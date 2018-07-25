@@ -1,10 +1,5 @@
 package blc
 
-import (
-	"fmt"
-	"time"
-)
-
 /**
 	定义区块链结构
  */
@@ -45,22 +40,7 @@ func (bchain *Blockchain) AddBlock(data []byte)  {
 
 }
 
-/**
-	显示所有区块
- */
-func (bchain *Blockchain) ShowAllBlock()  {
-	for _, block := range bchain.blocks{
-		fmt.Println("Data ",string(block.Data))
-		fmt.Printf("prev hash %x \n", block.PrevHash)
-		fmt.Printf("curr hash %x \n",block.Hash)
-
-		intTimestamp := block.Timestampe
-		//时间转化为string，layout必须为 "2006-01-02 15:04:05"
-	 	strTime := time.Unix(intTimestamp, 0).Format("2006-01-02 15:04:05")
-
-		fmt.Printf("create time %s \n", strTime)
-		fmt.Printf("nonce %v \n ", block.Nonce)
-
-		fmt.Println()
-	}
+func (blc *Blockchain) GetBlockChain() []*Block  {
+	return blc.blocks
 }
+

@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"BLCpublicchain_go/utils"
 	"fmt"
+	"encoding/gob"
+	"log"
 )
 
 /**
@@ -69,3 +71,31 @@ func (blc *Block) CalPowHash(nonce int64) [32]byte {
 	return hash32;
 
 }
+
+
+// 将结构序列化成字节数组
+func (block *Block) EnSerialize() []byte {
+	var result bytes.Buffer
+	encoder := gob.NewEncoder(&result)
+	err := encoder.Encode(block)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return result.Bytes()
+}
+
+// 反序列化
+func (bc *Block)DeSerialize(blockBytes []byte) *Block {
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(blockBytes))
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic(err)
+	}
+	return &block
+}
+
+ 
+ 
+ 
