@@ -1,11 +1,21 @@
 package boltdb
 
+
 import (
 	"log"
 	"github.com/boltdb/bolt"
 	"fmt"
 )
 
+const DB_NAME  = "BLC.db"
+const DB_TABLE_NAME_BLOCKS  = "blocks"
+const DB_TABLE_NAME_TIP  = "tip"
+
+const DB_TABLE_NAME_TIP_KEY_LASTBLOCKHASH = "lastBlcHash"//用于存放最后那块hash
+
+/**
+	bolt 数据库管理
+ */
 type DBManger struct {
 	boltdb *bolt.DB
 }
@@ -22,13 +32,32 @@ func OpenDB(dbFile string) *DBManger  {
 	return dbManager
 }
 
+func (dbManager *DBManger)IsExistDBTable(tableName string) bool  {
+	var isExisted bool
+	err := dbManager.boltdb.Update(func(tx *bolt.Tx) error {
+
+		//获取表，看是否存在
+		table := tx.Bucket([]byte(tableName))
+		if table != nil {
+			isExisted = true
+		}
+		return nil
+	})
+	//更新失败
+	if err != nil {
+		log.Panic(err)
+	}
+	return isExisted
+
+}
+
 /**
 	插入新数据
+	key: 以hash值作为key
  */
 
 func (dbManager *DBManger)InsertData(tableName string, key[]byte, data[] byte ) {
 
-	fmt.Println("db insert data")
 	var err error
 	if dbManager == nil {
 		return;
@@ -46,7 +75,7 @@ func (dbManager *DBManger)InsertData(tableName string, key[]byte, data[] byte ) 
 				return fmt.Errorf("db create table: %s", err)
 			}
 
-			fmt.Printf("db create a new table %s successfully \n ",tableName)
+		//	fmt.Printf("db create a new table %s successfully \n ",tableName)
 		}
 
 		// 往表里面存储数据
@@ -67,10 +96,10 @@ func (dbManager *DBManger)InsertData(tableName string, key[]byte, data[] byte ) 
 
 /**
 	查询数据
+	key: 以hash值作为key
  */
 func (dbManager *DBManger) SelectData(tableName string, key[]byte) []byte {
 	db := dbManager.boltdb
-	fmt.Printf("db select data \n")
 
 	var getData[] byte
 	err := db.View(func(tx *bolt.Tx) error {
@@ -86,6 +115,7 @@ func (dbManager *DBManger) SelectData(tableName string, key[]byte) []byte {
 
 	if err != nil{
 		fmt.Println("failed to select data")
+		return nil
 	}
 	return getData
 }

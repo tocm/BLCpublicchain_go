@@ -15,8 +15,8 @@ import (
  */
 type Block struct {
 	Timestampe int64
-	PrevHash [32]byte //Hash 固定为32字节长度
-	Hash [32]byte
+	PrevHash [32]byte //上一个block Hash 固定为32字节长度
+	Hash [32]byte//当前block hash
 	Data []byte
 	Nonce int64
 
@@ -86,7 +86,7 @@ func (block *Block) EnSerialize() []byte {
 }
 
 // 反序列化
-func (bc *Block)DeSerialize(blockBytes []byte) *Block {
+func DeSerialize(blockBytes []byte) *Block {
 	var block Block
 	decoder := gob.NewDecoder(bytes.NewReader(blockBytes))
 	err := decoder.Decode(&block)
@@ -96,6 +96,13 @@ func (bc *Block)DeSerialize(blockBytes []byte) *Block {
 	return &block
 }
 
- 
+func (block *Block) ShowBlockInfo()  {
+	fmt.Println("prev hash", block.PrevHash)
+	fmt.Println("hash: ",block.Hash)
+	fmt.Println("data: ", string(block.Data))
+	fmt.Println("timestamp", block.Timestampe)
+	fmt.Println("nonce", block.Nonce)
+	fmt.Println()
+}
  
  

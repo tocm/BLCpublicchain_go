@@ -63,9 +63,7 @@ func GetFlagForBlockChain() *FlagBlcParams  {
 
 		}
 	}
-
 	flagBlcParams := new(FlagBlcParams)
-
 	if addTransitionFlagCmd.Parsed() {
 		//allow add new transition
 		if *strFlagTransitionData == "" {
@@ -94,6 +92,7 @@ func SetFlag()  {
 	flagIntSerialize := flag.Int("serialize", 0, "序列化")
 	flagBoolDB := flag.Bool("boltdb",false, "数据库")
 
+	//解析
 	flag.Parse()
 
 	fmt.Printf("%s\n", *flagStrBLC)

@@ -18,7 +18,7 @@ import (
 //hash 256位=32字节=16进制表示64字符)
 const hashBitLen  = 256
 //决定工作量证明难度系数bit为单位，做移位运算系数
-const targetDegreeBit  = 16 //0000 0000 0000 0001
+const targetDegreeBit  = 20 //0000 0000 0000 0001
 
 var maxNonce int64 = math.MaxInt64 //定义nonce 最大值
 
@@ -77,6 +77,7 @@ func (pow *Pow)RunProofOfWork() (int64, [32]byte) {
 		//fmt.Printf("loop hashInt:%d ", hashInt)
 		isValid := pow.IsValidPowHash(hashBytes)
 		if isValid {
+			fmt.Printf("\n nonce: %d",nonce)
 			break
 		}
 		nonce++ //递增

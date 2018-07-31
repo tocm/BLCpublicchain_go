@@ -4,7 +4,6 @@ import (
 	"BLCpublicchain_go/blc"
 	"fmt"
 	"BLCpublicchain_go/flag"
-	"time"
 	"BLCpublicchain_go/boltdb"
 )
 
@@ -12,7 +11,6 @@ func main()  {
 
 	//part2_flagCommand()
 	part1_blockchain()
-
 
 }
 
@@ -31,8 +29,16 @@ func part2_flagCommand()  {
 func part1_blockchain()  {
 	flagBlcParams := flag.GetFlagForBlockChain()
 
-	//创建创世区块
-	blockchain := blc.CreateGenesisBlockChain()
+	blockchain := blc.Init()
+	_,dbm := blockchain.GetBlockchainDB()
+
+
+	//检查是否存在数据库表
+	if dbm.IsExistDBTable(boltdb.DB_TABLE_NAME_BLOCKS) == false {
+		//创建创世区块
+		blockchain.CreateGenesisBlockChain()
+	}
+
 	//新增区块
 	if flagBlcParams.AddTransitionData != "" {
 		blockchain.AddBlock([]byte(flagBlcParams.AddTransitionData))
@@ -42,8 +48,23 @@ func part1_blockchain()  {
 	//blockchain.AddBlock([]byte("transfer B to D 35 bitcoin"))
 	//blockchain.AddBlock([]byte("transfer B to B 15 bitcoin"))
 
+	if flagBlcParams.Printchain {
+		fmt.Println("------所有区块信息--------")
+		bchainIterator := blc.CreateIterator(blockchain)
+		for {
+			block := bchainIterator.Next()
+			if block == nil {
+				break
+			}
+			//打印
+			block.ShowBlockInfo()
+		}
+		fmt.Println()
+	}
+
 	//if flagBlcParams.Printchain {
 		//显示所有区块信息
+		/*
 		for _, block := range blockchain.GetBlockChain(){
 			fmt.Println("Data ",string(block.Data))
 			fmt.Printf("prev hash %x \n", block.PrevHash)
@@ -85,6 +106,7 @@ func part1_blockchain()  {
 		fmt.Printf("hash: %x \n",block.Hash)
 		fmt.Printf("hash: %s \n",block.Data)
 		fmt.Println()
+		*/
 	//}
 
 
