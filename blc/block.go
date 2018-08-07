@@ -18,6 +18,7 @@ type Block struct {
 	PrevHash [32]byte //上一个block Hash 固定为32字节长度
 	Hash [32]byte//当前block hash
 	Data []byte
+	//Transactions [] *Transaction
 	Nonce int64
 
 }

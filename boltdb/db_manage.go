@@ -5,6 +5,7 @@ import (
 	"log"
 	"github.com/boltdb/bolt"
 	"fmt"
+	"os"
 )
 
 const DB_NAME  = "BLC.db"
@@ -123,4 +124,9 @@ func (dbManager *DBManger) SelectData(tableName string, key[]byte) []byte {
 func (dbManager *DBManger) CloseDB() {
 	fmt.Printf("db close \n")
 	dbManager.boltdb.Close()
+}
+
+func DBIsExist() bool  {
+	_, err := os.Stat(DB_NAME);
+	return os.IsExist(err)
 }

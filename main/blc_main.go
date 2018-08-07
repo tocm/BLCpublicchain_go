@@ -1,10 +1,8 @@
 package main
 
 import (
-	"BLCpublicchain_go/blc"
 	"fmt"
-	"BLCpublicchain_go/flag"
-	"BLCpublicchain_go/boltdb"
+	"BLCpublicchain_go/cmd"
 )
 
 func main()  {
@@ -15,10 +13,20 @@ func main()  {
 }
 
 func part2_flagCommand()  {
-	flag.GetCommandInputArgs()
+	cmd.GetCommandInputArgs()
 	fmt.Println("")
-	flag.SetFlag()
+	cmd.SetFlag()
 }
+
+//func loadDB(blockchain *blc.Blockchain)  {
+//	_,dbm := blockchain.GetBlockchainDB()
+//
+//	//检查是否存在数据库表
+//	if dbm.IsExistDBTable(boltdb.DB_TABLE_NAME_BLOCKS) == false {
+//		//创建创世区块
+//		blockchain.CreateGenesisBlockChain()
+//	}
+//}
 
 /**
 	第一部分：
@@ -27,40 +35,31 @@ func part2_flagCommand()  {
 	如何计算hash
  */
 func part1_blockchain()  {
-	flagBlcParams := flag.GetFlagForBlockChain()
 
-	blockchain := blc.Init()
-	_,dbm := blockchain.GetBlockchainDB()
+	cmdParams := cmd.InitCmd();
+	cmdParams.Works()
 
 
-	//检查是否存在数据库表
-	if dbm.IsExistDBTable(boltdb.DB_TABLE_NAME_BLOCKS) == false {
-		//创建创世区块
-		blockchain.CreateGenesisBlockChain()
+	if(cmdParams.CreateGenesisBlockChain) {
+		cmdParams.BlockChain.CreateGenesisBlockChain()
 	}
 
 	//新增区块
-	if flagBlcParams.AddTransitionData != "" {
-		blockchain.AddBlock([]byte(flagBlcParams.AddTransitionData))
+	if cmdParams.AddTransitionData != "" {
+		cmdParams.BlockChain.AddBlock([]byte(cmdParams.AddTransitionData))
 	}
+
+	if cmdParams.Printchain {
+		cmdParams.PrintChain()
+	}
+
+
 	//blockchain.AddBlock([]byte("transfer A to B 100 bitcoin"))
 	//blockchain.AddBlock([]byte("transfer B to C 50 bitcoin"))
 	//blockchain.AddBlock([]byte("transfer B to D 35 bitcoin"))
 	//blockchain.AddBlock([]byte("transfer B to B 15 bitcoin"))
 
-	if flagBlcParams.Printchain {
-		fmt.Println("------所有区块信息--------")
-		bchainIterator := blc.CreateIterator(blockchain)
-		for {
-			block := bchainIterator.Next()
-			if block == nil {
-				break
-			}
-			//打印
-			block.ShowBlockInfo()
-		}
-		fmt.Println()
-	}
+
 
 	//if flagBlcParams.Printchain {
 		//显示所有区块信息

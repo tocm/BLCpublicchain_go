@@ -25,6 +25,12 @@ func Init() *Blockchain  {
 	//创建并打开数据库
 	blockchain.dbManager = boltdb.OpenDB(boltdb.DB_NAME)
 
+	//暂时没有任何块数据
+	if blockchain.dbManager.IsExistDBTable(boltdb.DB_TABLE_NAME_TIP) == false {
+		return blockchain
+	}
+
+	//如果已经有区块数据，将当前区块hash放到内存
 	if blockchain.dbManager != nil{
 		//将数据库中值取出放到内存
 		 lasthash:= blockchain.dbManager.SelectData(boltdb.DB_TABLE_NAME_TIP,[]byte(boltdb.DB_TABLE_NAME_TIP_KEY_LASTBLOCKHASH))
@@ -39,6 +45,12 @@ func Init() *Blockchain  {
 	创建创世区块链
  */
 func (bchain *Blockchain)CreateGenesisBlockChain()  {
+
+	if bchain.dbManager.IsExistDBTable(boltdb.DB_TABLE_NAME_TIP) {
+		fmt.Println("The Genesis block has been existed!")
+		return
+	}
+
 	fmt.Println("todo Create Genesis Block ")
 	//创建创世区块
 	block := CreateGenesisBlock();
