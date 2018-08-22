@@ -3,6 +3,7 @@ package blc
 import (
 	"BLCpublicchain_go/boltdb"
 	"fmt"
+	"BLCpublicchain_go/utils"
 )
 
 /**
@@ -72,30 +73,23 @@ func (bchain *Blockchain)CreateGenesisBlockChain()  {
 /**
 	新增区块到区块链上
  */
-func (bchain *Blockchain) AddBlock(data []byte)  {
+func (bchain *Blockchain) AddBlock(data []byte, txs[] *Transaction)  {
 
-	/*
-	旧的方式
-	//get prevHash
-	chainLen := len(bchain.blocks)
-	//获取链中最尾的块
-	lastBlock := bchain.blocks[chainLen - 1]
-
-	//取出上个区块的hash
-	prevHash := lastBlock.Hash
-	创建新区块
-	newBlock := NewBlock(data, prevHash)
-	新区块追加到链尾
-	bchain.blocks = append(bchain.blocks, newBlock)
-	*/
+	if txs == nil {
+		return;
+	}
 
 	//获取链中最尾的块
 	lastBlockHash := bchain.lastBlockHash
 	//取出上个区块的hash
 	prevHash := lastBlockHash
+	//取出上一个区块
+	lastBlock := bchain.GetBlockFromDB(prevHash)
+	//取出上一区块的index
+	blockIndex := lastBlock.Index
 
 	//创建新区块
-	newBlock := NewBlock(data, prevHash)
+	newBlock := NewBlock(blockIndex+1, data, prevHash, txs)
 	//将最新区块的hash 放到内存区块结构变量
 	bchain.lastBlockHash = newBlock.Hash
 	//准备放到数据库：先序列化
@@ -110,5 +104,102 @@ func (bchain *Blockchain) GetBlockchainDB() (hash[32]byte, db *boltdb.DBManger) 
 }
 
 
+/*
+	从数据库中取出指定区块
+	@params hash []byte  区块hash
+ */
+func (bchain *Blockchain)GetBlockFromDB(hash [32]byte) *Block {
+	if bchain.dbManager != nil {
+		//先从数据库中取出
+		blockBytes := bchain.dbManager.SelectData(boltdb.DB_TABLE_NAME_BLOCKS, hash[:])
+		//反序列化
+		block := DeSerialize(blockBytes)
+		return block
+	}
+	return nil
+}
 
+func (bchain *Blockchain)GetBalance(walletAddress string) int64  {
+
+	var availableTxs[] *Transaction;//存放链上所有涉及当前用户钱包地址的交易数据
+
+	var spentTxInputs[] *TXInput; //存放当前用户已经存在的交易输入
+
+	var balance int64; //存放余额
+
+
+	//1. 遍历所有区块并找出相关的交易数据存放在新的一个数组上
+	if bchain != nil {
+		bcIterator := CreateIterator(bchain)
+		for {
+			block := bcIterator.Next()
+
+			if block == nil {
+				break
+			}
+
+			//取出当前区块中的所有交易
+			transactions := block.Transactions
+
+			//查找与当前钱包地址相关的所有区块交易
+			for _, tx := range transactions {
+				//判断当前地址是否可用
+				isEnableTxs := tx.IsEnableTransaction(walletAddress)
+				if isEnableTxs {
+					//fmt.Println("available: ", tx.TxHash)
+					//重新放到一个交易
+					availableTxs = append(availableTxs, tx);
+
+					//遍历TxInput当前交易中已花费的交易输入
+					for _,spentTx := range tx.TxIns {
+						if spentTx.TxHash != nil {
+							//fmt.Println("spent tx inputs: ", spentTx.TxHash)
+							//把已花费的交易输入数据存到新数组
+							spentTxInputs = append(spentTxInputs, spentTx)
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	//2. 处理与用户地址相关的可用交易块，找出未花费的交易块
+	//Find_UnSpentTxs
+	for _, availabTrx := range availableTxs {
+		var isSpentTxs bool
+		trxhash := availabTrx.TxHash
+		//fmt.Printf("getBalance s3 trx hash %x \n ", trxhash)
+		//从已花费交易块中数组中的TxInput中查找是否有对应的输入，如果有即已被花费，否则即为未花费
+		for _, trx := range spentTxInputs {
+			//fmt.Printf("getBalance s4 compare trxhash %x \n ", trx.TxHash)
+			if utils.CompareHash(trxhash, trx.TxHash) {
+				//确认当前块是已花费的input txHash
+				isSpentTxs = true
+			}
+		}
+
+		//如果为已花费交易块，即跳出
+		if isSpentTxs {
+			fmt.Println("continue ")
+			continue
+		}
+
+		//找出用户对应output的余额
+		trxOutputs := availabTrx.TxOuts
+		for _,output := range trxOutputs {
+			//fmt.Println("count the user : ", output.WalletAddress)
+			if output.WalletAddress == walletAddress {
+				//如果满足就累计余额
+				balance += output.Amount
+				//fmt.Printf("User: %s, balance: %d",walletAddress, balance)
+			}
+		}
+
+	}
+
+	return balance
+
+
+}
 

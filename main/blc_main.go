@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"BLCpublicchain_go/cmd"
+	"BLCpublicchain_go/blc"
 )
 
 func main()  {
@@ -40,18 +41,26 @@ func part1_blockchain()  {
 	cmdParams.Works()
 
 
-	if(cmdParams.CreateGenesisBlockChain) {
+	if cmdParams.CreateGenesisBlockChain {
 		cmdParams.BlockChain.CreateGenesisBlockChain()
 	}
 
 	//新增区块
 	if cmdParams.AddTransitionData != "" {
-		cmdParams.BlockChain.AddBlock([]byte(cmdParams.AddTransitionData))
+		var trxs[] *blc.Transaction
+		cmdParams.BlockChain.AddBlock([]byte(cmdParams.AddTransitionData), trxs)
 	}
 
+	//打印所有区块
 	if cmdParams.Printchain {
 		cmdParams.PrintChain()
 	}
+
+	if cmdParams.GetBalanceAddress != "" {
+		//获取余额
+		cmdParams.GetBalance()
+	}
+
 
 
 	//blockchain.AddBlock([]byte("transfer A to B 100 bitcoin"))

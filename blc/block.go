@@ -8,29 +8,33 @@ import (
 	"fmt"
 	"encoding/gob"
 	"log"
+	"BLCpublicchain_go/wallet"
 )
 
 /**
 	定义区块结构
  */
 type Block struct {
-	Timestampe int64
+	Index int64 //第几个区块
+	Timestampe int64 //生成时间
 	PrevHash [32]byte //上一个block Hash 固定为32字节长度
 	Hash [32]byte//当前block hash
-	Data []byte
-	//Transactions [] *Transaction
-	Nonce int64
+	Data []byte //区块信息
+	Transactions [] *Transaction //每个区块可以包含多笔交易数据
+	Nonce int64 //动态生成，满足pow标识算法的随机数
 
 }
 
 /**
 	Create new block
  */
-func NewBlock(data []byte, preHash [32]byte)  *Block {
+func NewBlock(index int64, data []byte, preHash [32]byte, trxs[] *Transaction)  *Block {
 	new_block := new(Block)
+	new_block.Index = index
 	new_block.Data = data
 	new_block.Timestampe = time.Now().Unix()
 	new_block.PrevHash = preHash
+	new_block.Transactions = trxs
 
 	//执行工作量证明 pow算法 挖矿
 	pow := CreatePow(new_block)
@@ -48,7 +52,15 @@ func NewBlock(data []byte, preHash [32]byte)  *Block {
 	创建创世区块
  */
 func CreateGenesisBlock() *Block {
-	genesisBlock := NewBlock([]byte("This is a genesis block"), [32]byte{0} )
+
+	//创建一个钱包地址hash
+	genesisWallet := wallet.NewWallet()
+	genesisWalletAddress := genesisWallet.GetWalletAddress()
+	//创建创世交易
+	genesisTrans := CreateGenesisTransactions(utils.ByteToString(genesisWalletAddress))
+
+	//创建区块
+	genesisBlock := NewBlock(0, []byte("Create a genesis block"), [32]byte{0}, genesisTrans)
 	return genesisBlock;
 }
 
@@ -98,11 +110,23 @@ func DeSerialize(blockBytes []byte) *Block {
 }
 
 func (block *Block) ShowBlockInfo()  {
+	fmt.Println("block index : ", block.Index)
 	fmt.Println("prev hash", block.PrevHash)
 	fmt.Println("hash: ",block.Hash)
 	fmt.Println("data: ", string(block.Data))
 	fmt.Println("timestamp", block.Timestampe)
 	fmt.Println("nonce", block.Nonce)
+	fmt.Println("transaction:::::")
+	for index,trx := range block.Transactions {
+		fmt.Printf("		Transaction hash: %x, the index[%d] in block \n", trx.TxHash, index)
+		for _, txinput := range trx.TxIns {
+			fmt.Printf("		TXInput=== From Transaction hash: %x, walletAddr: %s, From preTransaction TxOutput arrays Index: %d \n",txinput.TxHash,txinput.WalletAddress,txinput.VOutId)
+		}
+		for _, txoutput := range trx.TxOuts {
+			fmt.Printf("		TxOutput=== To Transaction walletAddr: %s, amount: %d \n",txoutput.WalletAddress,txoutput.Amount)
+		}
+		fmt.Println()
+	}
 	fmt.Println()
 }
  

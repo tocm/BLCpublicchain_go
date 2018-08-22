@@ -29,3 +29,34 @@ func IsCompGenerateBlock(hash []byte) bool {
 
 	return false
 }
+
+/*
+	比较HASH是否相等
+ */
+func CompareHash(hash1 []byte, hash2[] byte ) bool{
+
+	var hashInt1 big.Int
+	hashInt1.SetBytes(hash1)
+
+	var hashInt2 big.Int
+	hashInt2.SetBytes(hash2)
+
+	// Cmp compares x and y and returns:
+	//
+	//   -1 if x <  y
+	//    0 if x == y
+	//   +1 if x >  y
+	if hashInt1.Cmp(&hashInt2) == 0 {
+		return true
+	}
+	return false
+}
+
+func ByteToString(p []byte) string {
+	for i := 0; i < len(p); i++ {
+		if p[i] == 0 {
+			return string(p[0:i])
+		}
+	}
+	return string(p)
+}

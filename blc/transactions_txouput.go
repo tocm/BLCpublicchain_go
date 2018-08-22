@@ -1,7 +1,9 @@
 package blc
 
+/**
+	交易输出结构
+ */
 type TXOutput struct {
-	amount int64 //transaction num
-	userKey string //user
-
+	Amount int64 //交易数额
+	WalletAddress string //用户钱包地址
 }

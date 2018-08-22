@@ -1,12 +1,12 @@
 package blc
 
+/**
+	交易输入结构
+ */
 type TXInput struct {
-	// 1. 交易的Hash
-	TxHash      []byte
-	// 2. 存储TXOutput在Vout里面的索引
-	VOutId      int
-	// 3. 用户名
-	UserKey string
+	TxHash      []byte //对应当前交易hash
+	VOutId      int //对应交易输入output中的index
+	WalletAddress string //来自交易输入的钱包地址
 
 }
 
