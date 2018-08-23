@@ -24,7 +24,6 @@ type Wallet struct {
 
 	//椭圆曲线算法生成私有key
 	PrivateKey ecdsa.PrivateKey
-	
 	//公有key 由私有key生成
 	PublicKey []byte
 
@@ -90,7 +89,6 @@ func (w *Wallet) GetWalletAddress() []byte {
 	fmt.Printf("create wallet address string %s \n",wallet_address)
 	return wallet_address
 }
-
 
 /**
 	2: 两次hash算法RIPEMD160(SHA256(PubKey))

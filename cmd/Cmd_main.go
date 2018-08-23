@@ -22,7 +22,8 @@ func showUsageTips()  {
 	fmt.Println("\taddTransition -data DATA ----- 新增交易数据.")
 	fmt.Println("\tprintchain ----- 是否允许输出区块信息.")
 	fmt.Println("\tgetBalance -address  WALLET ADDRESS------获取账户余额")
-
+	fmt.Println("\tcreateWallet ------创建新钱包")
+	fmt.Println("\tlistWallets ------显示所有钱包地址")
 
 }
 
@@ -32,11 +33,16 @@ type CmdParams struct {
 	AddTransitionData string
 	Printchain bool
 	GetBalanceAddress string
+	CreateWallet bool
+	ListWallet bool
 
 }
 
 func InitCmd() *CmdParams  {
-	return &CmdParams{blc.Init(),false,"",false, ""}
+	cmdParams := new(CmdParams)
+	cmdParams.BlockChain = blc.Init()
+
+	return cmdParams
 }
 
 /**
@@ -50,6 +56,8 @@ func (cmdParams *CmdParams)Works()   {
 	addTransitionFlagCmd := flag.NewFlagSet("addTransition", flag.ExitOnError )
 	printChainFlagCmd := flag.NewFlagSet("printchain", flag.ExitOnError)
 	getBalanceFlagCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
+	createWalletFlagCmd := flag.NewFlagSet("createWallet", flag.ExitOnError)
+	listWalletFlagCmd := flag.NewFlagSet("listWallets", flag.ExitOnError)
 
 
 	//获取对应参数
@@ -86,7 +94,18 @@ func (cmdParams *CmdParams)Works()   {
 				log.Panic(err)
 			}
 			break
-
+		case "createWallet":
+			err = createWalletFlagCmd.Parse(os.Args[2:])
+			if err != nil {
+				log.Panic(err)
+			}
+			break
+		case "listWallets":
+			err = listWalletFlagCmd.Parse(os.Args[2:])
+			if err != nil {
+				log.Panic(err)
+			}
+			break
 		default:
 			showUsageTips()
 			os.Exit(1)
@@ -124,6 +143,14 @@ func (cmdParams *CmdParams)Works()   {
 	if createGenesisBlockFlagCmd.Parsed() {
 		cmdParams.CreateGenesisBlockChain = true
 	}
+
+	if createWalletFlagCmd.Parsed() {
+		cmdParams.CreateWallet = true
+	}
+	if listWalletFlagCmd.Parsed() {
+		cmdParams.ListWallet = true
+	}
+
 
 }
 

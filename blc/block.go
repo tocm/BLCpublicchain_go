@@ -54,8 +54,8 @@ func NewBlock(index int64, data []byte, preHash [32]byte, trxs[] *Transaction)  
 func CreateGenesisBlock() *Block {
 
 	//创建一个钱包地址hash
-	genesisWallet := wallet.NewWallet()
-	genesisWalletAddress := genesisWallet.GetWalletAddress()
+	wallets := wallet.GetWalletMaps()
+	genesisWalletAddress := wallets.CreateWallet()
 	//创建创世交易
 	genesisTrans := CreateGenesisTransactions(utils.ByteToString(genesisWalletAddress))
 

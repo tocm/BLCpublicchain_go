@@ -61,6 +61,13 @@ func part1_blockchain()  {
 		cmdParams.GetBalance()
 	}
 
+	if cmdParams.CreateWallet {
+		cmdParams.CreateNewWallet()
+	}
+
+	if cmdParams.ListWallet {
+		cmdParams.ListWalletAddress()
+	}
 
 
 	//blockchain.AddBlock([]byte("transfer A to B 100 bitcoin"))
